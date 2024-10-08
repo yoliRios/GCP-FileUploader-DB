@@ -1,0 +1,4 @@
+frontend/node_modules/
+.venv/
+.vscode/
+backend/application_default_credentials.json

@@ -1,0 +1,75 @@
+Create the database
+
+Add database config and Run the backend locally and try to connect to the database
+	- test the backend with postman
+
+		Exeute in terminal: 
+		sudo apt-get install postgresql-client
+		<database-name> postgres
+
+		CREATE DATABASE flask_app_db;
+		CREATE USER admin1 WITH ENCRYPTED PASSWORD 'Test1234*';
+		GRANT ALL PRIVILEGES ON DATABASE flask_app_db TO admin1;
+
+
+Create a docker image of the backend and run it
+	- test it with postman (make sure it still connects to db)
+	
+	docker run --rm -p 5000:5000 -e CREDENTIALS="$(cat  application_default_credentials.json)" --name backend-app backend	
+
+Create the frontend 
+	- Run it locally
+	- Connect to the local backend and run it
+		- this should update values/or fetch values from the database
+	- Sometime to establish a connection we need to add cors
+		from flask_cors import CORS		
+			CORS(app)
+		
+Create docker image of frontend and connect to the backend CONTAINER
+	- test everything works fine	
+	- docker run --rm -p 8000:8000 --name fronted-app frontend
+	
+	
+Deploy backend in Cluster01
+	gcloud container clusters create backend-cluster --num-nodes=2 --zone=us-central1-a --enable-ip-alias   
+	gcloud container clusters get-credentials backend-cluster --zone us-central1-a
+	
+	
+	docker tag backend:latest gcr.io/flaskgkeuploader/backend:latest
+	docker tag frontend:latest gcr.io/flaskgkeuploader/frontend:latest
+	Add secrets
+
+	kubectl create secret docker-registry gcr-json-key --docker-server=gcr.io --docker-username=_json_key --docker-password="$(cat C:\Users\yolim\.docker\config.json)" --docker-email=yolimar.rios23@gmail.com
+	- create deployment
+	- create service
+	- test again with postman
+	
+	kubectl create secret generic db-credentials --from-literal=DB_HOST=34.31.3.147 --from-literal=DB_NAME=flask_app_db --from-literal=DB_USER=admin1 --from-literal=DB_PASSWORD=Test1234*
+	
+	Expose the application --- Public
+	kubectl expose deployment flask-app-deployment --type=LoadBalancer --port 80 --target-port 5000
+	kubectl get pods
+	kubectl get secrets
+	kubectl get svc
+	
+	Add the backend IP in cluster to frontend and test the frontend
+	- locally
+	- as a docker container
+	
+Deploy frontend in Cluster02
+
+	gcloud container clusters create frontend-cluster --num-nodes=2 --zone=us-central1-a --enable-ip-alias  
+	gcloud container clusters get-credentials frontend-cluster --zone us-central1-a
+	gcloud auth configure-docker
+
+kubectl create secret docker-registry gcr-json-key --docker-server=gcr.io --docker-username=_json_key --docker-password="$(cat C:\Users\yolim\.docker\config.json)" --docker-email=yolimar.rios23@gmail.com
+docker push gcr.io/flaskgkeuploader/frontend:latest 
+
+kubectl expose deployment frontend-app-deployment --type=LoadBalancer --port 80 --target-port 3000
+
+	- test on web
+
+Monitoring part
+cmd:
+	winget install Helm.Helm
+
