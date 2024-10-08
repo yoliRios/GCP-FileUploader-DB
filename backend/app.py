@@ -1,18 +1,23 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import psycopg2
 from google.cloud import storage
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
 
+CORS(app)
+
 # Fetch environment variables
 db_user = os.getenv('DB_USER', 'admin1')
-db_pass = os.getenv('DB_PASS', 'Mathias01*')
+db_pass = os.getenv('DB_PASS', 'Test1234*')
 db_name = os.getenv('DB_NAME', 'flask_app_db')
-db_host = os.getenv('DB_HOST', '35.226.53.78')  # Localhost if using Cloud SQL Proxy
+db_host = os.getenv('DB_HOST', '34.31.3.147')  # Localhost if using Cloud SQL Proxy
 
 os.environ["GCLOUD_PROJECT"] = "flaskgkeuploader"
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "./application_default_credentials.json"
+
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.getenv('CREDENTIALS', "./application_default_credentials.json")
 # Set the Google Cloud Storage bucket name
 BUCKET_NAME = 'flaskgke-bucket'
 
@@ -44,6 +49,10 @@ def insert_data():
 
     conn = connect_db()
     cursor = conn.cursor()
+
+    cursor.execute("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name VARCHAR(100), email VARCHAR(100))")
+    conn.commit()
+
     cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
     conn.commit()
     cursor.close()
@@ -66,8 +75,9 @@ def get_data():
 # Endpoint to upload file to GCP bucket
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"message": "No file part in the request"}), 400
+    file = request.files['file']
+    if not file:
+        return jsonify({"message": "No file provided!"}), 400
     
     file = request.files['file']
     if file.filename == '':
@@ -76,3 +86,9 @@ def upload_file():
     message = upload_to_gcp(file)
     return jsonify({"message": message})
 
+if __name__ == '__main__':
+    print("Hello")
+
+    print(os.getenv('CREDENTIALS', "./application_default_credentials.json"))
+
+    app.run(host='0.0.0.0', port=5000, debug=True)
