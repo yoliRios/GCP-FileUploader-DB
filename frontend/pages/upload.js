@@ -1,38 +1,36 @@
 import { useState } from 'react';
-import axios from 'axios';
-import Menu from '../components/Menu';
 
-const Upload = () => {
+export default function UploadPage() {
   const [file, setFile] = useState(null);
-  const [message, setMessage] = useState('');
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
-
-  const handleSubmit = async (e) => {
+  const handleUpload = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append('file', file);
-    try {
-      const res = await axios.post('http://34.42.37.195/upload', formData);
-      setMessage(res.data.message);
-    } catch (err) {
-      setMessage('Error uploading file');
-    }
+
+    const res = await fetch('http://localhost:5000/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    alert(data.message); // Handle response appropriately
   };
 
   return (
-    <div>
-      <Menu />
-      <h1>Upload File</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="file" onChange={handleFileChange} />
-        <button type="submit">Upload</button>
+    <div style={{ marginTop:'60px'}}>
+      <h2>Upload File</h2>
+      <form onSubmit={handleUpload}>
+        <div className="mb-3" style={{ marginTop:'40px'}}>
+          <input
+            type="file"
+            className="form-control"
+            onChange={(e) => setFile(e.target.files[0])}
+            required
+          />
+        </div>
+        <button type="submit" className="btn btn-indigo">Upload</button>
       </form>
-      {message && <p>{message}</p>}
     </div>
   );
-};
-
-export default Upload;
+}

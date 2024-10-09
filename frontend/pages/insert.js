@@ -1,44 +1,75 @@
 import { useState } from 'react';
-import axios from 'axios';
-import Menu from '../components/Menu';
+import { Form, Button, Alert } from 'react-bootstrap';
 
-const Insert = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post('http://34.42.37.195/insert', { name, email });
-      setMessage(res.data.message);
-    } catch (err) {
-      setMessage('Error inserting data');
-    }
-  };
-
+export default function InsertData() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
+  
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError('');
+      setSuccess(false);
+  
+      // Validaciones
+      if (!name || !email) {
+        setError('Both name and email are required.');
+        return;
+      }
+  
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        setError('Please enter a valid email address.');
+        return;
+      }
+  
+      try {
+        const response = await fetch('/api/insert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email }),
+        });
+  
+        if (response.ok) {
+          setSuccess(true);
+          setName('');
+          setEmail('');
+        } else {
+          setError('Failed to insert data.');
+        }
+      } catch (error) {
+        setError('An error occurred while inserting data.');
+      }
+};
   return (
-    <div>
-      <Menu />
-      <h1>Insert Data</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <button type="submit">Insert</button>
-      </form>
-      {message && <p>{message}</p>}
+    <div  className="d-flex flex-column " style={{ marginTop:'60px'}}>
+      <h2>Insert Data</h2>      
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && <Alert variant="success">Data inserted successfully!</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="formName">
+          <Form.Label>Name</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter the user's name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Form.Group>
+        <Form.Group controlId="formEmail">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            placeholder="Enter the user's email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Form.Group>
+        <Button  style={{ marginTop:'20px'}} variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
     </div>
   );
-};
+}
 
-export default Insert;

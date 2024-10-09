@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 import psycopg2
 from google.cloud import storage
 from flask_cors import CORS
@@ -72,6 +72,17 @@ def get_data():
 
     return jsonify(users)
 
+# Endpoint to delete user from PostgreSQL
+@app.route('/delete/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"message": "User deleted successfully"}), 200
+
 # Endpoint to upload file to GCP bucket
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -87,8 +98,4 @@ def upload_file():
     return jsonify({"message": message})
 
 if __name__ == '__main__':
-    print("Hello")
-
-    print(os.getenv('CREDENTIALS', "./application_default_credentials.json"))
-
-    app.run(host='0.0.0.0', port=5000, debug=True)
+       app.run(host='0.0.0.0', port=5000, debug=True)

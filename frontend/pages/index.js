@@ -1,10 +1,18 @@
-import Menu from '../components/Menu';
+import { useEffect, useState } from 'react';
 
-const Home = () => (
-  <div>
-    <Menu />
-    <h1>Welcome to the Frontend App</h1>
-  </div>
-);
+export default function Home() {
+  const [isClient, setIsClient] = useState(false);
 
-export default Home;
+  useEffect(() => {
+    setIsClient(true); // Ensure client-side rendering
+  }, []);
+
+  return (
+    <div style={{ marginTop:'60px'}}>
+      <h1>Welcome to MyApp</h1>
+      {isClient && (
+        <p>This site allows you to insert data, fetch data, and upload files!</p>
+      )}
+    </div>
+  );
+}
