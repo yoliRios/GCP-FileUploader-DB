@@ -6,7 +6,7 @@ export default function GetDataPage() {
   // Fetch data from the backend on component mount
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch('http://localhost:5000/get');
+      const res = await fetch('http://104.198.60.100/get');
       const data = await res.json();
       setUsers(data);
     };
@@ -15,7 +15,7 @@ export default function GetDataPage() {
 
   // Function to handle delete request
   const handleDelete = async (id) => {
-    const res = await fetch(`http://localhost:5000/delete/${id}`, {
+    const res = await fetch(`http://104.198.60.100/delete/${id}`, {
       method: 'DELETE',
     });
     const data = await res.json();

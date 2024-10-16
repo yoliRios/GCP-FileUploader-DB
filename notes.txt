@@ -16,6 +16,7 @@ Create a docker image of the backend and run it
 	- test it with postman (make sure it still connects to db)
 	
 	docker run --rm -p 5000:5000 -e CREDENTIALS="$(cat  application_default_credentials.json)" --name backend-app backend	
+	docker run --rm -p 5000:5000  --name backend-app backend                                                                          
 
 Create the frontend 
 	- Run it locally
@@ -27,8 +28,7 @@ Create the frontend
 		
 Create docker image of frontend and connect to the backend CONTAINER
 	- test everything works fine	
-	- docker run --rm -p 8000:8000 --name fronted-app frontend
-	
+	- docker run --rm -p 8000:3000 --name fronted-app frontend
 	
 Deploy backend in Cluster01
 	gcloud container clusters create backend-cluster --num-nodes=2 --zone=us-central1-a --enable-ip-alias   
@@ -45,6 +45,15 @@ Deploy backend in Cluster01
 	- test again with postman
 	
 	kubectl create secret generic db-credentials --from-literal=DB_HOST=34.31.3.147 --from-literal=DB_NAME=flask_app_db --from-literal=DB_USER=admin1 --from-literal=DB_PASSWORD=Test1234*
+	
+	Push the image:
+	gcloud auth configure-docker
+	docker push gcr.io/flaskgkeuploader/backend:latest
+	
+	Deployment:
+	
+	kubectl apply -f deployment.yaml  
+	
 	
 	Expose the application --- Public
 	kubectl expose deployment flask-app-deployment --type=LoadBalancer --port 80 --target-port 5000
@@ -65,6 +74,8 @@ Deploy frontend in Cluster02
 kubectl create secret docker-registry gcr-json-key --docker-server=gcr.io --docker-username=_json_key --docker-password="$(cat C:\Users\yolim\.docker\config.json)" --docker-email=yolimar.rios23@gmail.com
 docker push gcr.io/flaskgkeuploader/frontend:latest 
 
+kubectl apply -f deployment.yaml  
+
 kubectl expose deployment frontend-app-deployment --type=LoadBalancer --port 80 --target-port 3000
 
 	- test on web
@@ -72,4 +83,20 @@ kubectl expose deployment frontend-app-deployment --type=LoadBalancer --port 80 
 Monitoring part
 cmd:
 	winget install Helm.Helm
+	
+	
+	FROM node:alpine
+
+# Create app directory   
+WORKDIR /app
+
+# Install app dependencies
+COPY . .
+
+# Bundle app source
+RUN npm install
+RUN npm run build
+
+#  Expose the port the app runs in
+ENTRYPOINT [ "npm", "run", "start" ]
 

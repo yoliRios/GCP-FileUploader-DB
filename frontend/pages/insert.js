@@ -24,7 +24,7 @@ export default function InsertData() {
       }
   
       try {
-        const response = await fetch('/api/insert', {
+        const response = await fetch('http://104.198.60.100/insert', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email }),

@@ -14,6 +14,7 @@ export default function Layout({ children }) {
             <Nav.Link href="/insert">Insert User</Nav.Link>
             <Nav.Link href="/get">User List</Nav.Link>
             <Nav.Link href="/upload">Upload File</Nav.Link>
+            <Nav.Link href="/get-messages">Messages List</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

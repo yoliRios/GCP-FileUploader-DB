@@ -1,4 +1,5 @@
-FROM node:alpine
+# Description: Dockerfile for the frontend service
+FROM node:18-alpine
 
 # Create app directory   
 WORKDIR /app
